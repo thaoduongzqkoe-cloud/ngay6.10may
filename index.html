@@ -108,6 +108,38 @@ button {
     padding-top: 20px;
   }
 }
+
+/* ===== Countdown Overlay ===== */
+#countdownOverlay{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background:rgba(0,0,0,0.85);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  z-index:9999;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity 0.3s ease;
+}
+
+#countdownNumber{
+  font-size:80px;
+  color:#fff;
+  font-weight:bold;
+  transform:scale(0.5);
+  opacity:0;
+  animation:pop 1s ease forwards;
+}
+
+@keyframes pop{
+  0%{ transform:scale(0.5); opacity:0; }
+  50%{ transform:scale(1.2); opacity:1; }
+  100%{ transform:scale(1); opacity:1; }
+}
 </style>
 
 </head>
@@ -122,6 +154,11 @@ button {
   <button onclick="verify()">Xác nhận</button>
 
   <div class="result" id="result"></div>
+</div>
+
+<!-- Countdown UI -->
+<div id="countdownOverlay">
+  <div id="countdownNumber">3</div>
 </div>
 
 <script>
@@ -144,20 +181,52 @@ function verify() {
     result.style.color = "green";
     result.innerText = "✔ Đang chuyển...";
 
-    // 🎯 Track event TikTok
     if (typeof ttq !== "undefined") {
       ttq.track('CompleteRegistration');
     }
 
-    setTimeout(() => {
-      window.location.href = "https://zotrangchu3.carrd.co/";
-    }, 1000);
+    // 👉 gọi countdown thay vì redirect ngay
+    startCountdown();
 
   } else {
     result.style.color = "red";
     result.innerText = "✖ Sai, thử lại";
     generateCaptcha();
   }
+}
+
+/* ===== Countdown logic ===== */
+function startCountdown(){
+  const overlay = document.getElementById("countdownOverlay");
+  const number = document.getElementById("countdownNumber");
+
+  overlay.style.opacity = "1";
+  overlay.style.pointerEvents = "auto";
+
+  let count = 3;
+  number.innerText = count;
+
+  let interval = setInterval(()=>{
+    count--;
+
+    if(count === 0){
+      clearInterval(interval);
+
+      number.innerText = "GO!";
+      number.style.animation = "pop 0.5s ease";
+
+      setTimeout(()=>{
+        window.location.href = "https://zotrangchu3.carrd.co/";
+      }, 500);
+
+    } else {
+      number.style.animation = "none";
+      void number.offsetWidth;
+      number.style.animation = "pop 1s ease";
+      number.innerText = count;
+    }
+
+  }, 1000);
 }
 
 generateCaptcha();
